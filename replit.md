@@ -1,6 +1,6 @@
-# [Project name]
+# Receitas em Destaque
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Um app mobile para descobrir, curtir, salvar e compartilhar receitas da comunidade.
 
 ## Run & Operate
 
@@ -22,23 +22,33 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/receitas-mobile/app/(tabs)/index.tsx` — feed, busca e filtros por categoria
+- `artifacts/receitas-mobile/app/recipe/[id].tsx` — detalhe, ingredientes, preparo e compartilhamento
+- `artifacts/receitas-mobile/context/RecipeContext.tsx` — curtidas e receitas salvas com persistência local
+- `artifacts/receitas-mobile/data/recipes.ts` — catálogo inicial de receitas
+- `artifacts/receitas-mobile/constants/colors.ts` — tokens visuais do app
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- O primeiro lançamento é local-first: curtidas e salvos persistem no aparelho via AsyncStorage.
+- O feed destaca a receita mais curtida e permite descoberta por busca e categorias.
+- A navegação usa abas nativas e uma tela de detalhe em stack para manter o fluxo mobile simples.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Feed com receita mais curtida da semana e lista de novas ideias.
+- Busca textual e filtros por Todas, Mais curtidas, Rápidas, Doces e Saudáveis.
+- Curtir, salvar, compartilhar e consultar ingredientes e modo de preparo.
+- Coleção de receitas salvas e perfil com contadores pessoais.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- O usuário pediu uma experiência mobile para compartilhamento de receitas.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- A prévia mobile usa Expo Go; o QR code aparece no painel de preview do Replit.
+- O app está preparado para evoluir para backend e contas, mas o primeiro lançamento usa dados locais.
 
 ## Pointers
 

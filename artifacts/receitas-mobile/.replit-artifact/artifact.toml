@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/"
+title = "Receitas em Destaque"
+description = "Um app mobile para descobrir, curtir, salvar e compartilhar receitas da comunidade, com feed ordenado pelas receitas mais curtidas."
+version = "1.0.0"
+id = "artifacts/receitas-mobile"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/" ]
+localPort = 25360
+
+[services.development]
+run = "pnpm --filter @workspace/receitas-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/receitas-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/receitas-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "25360"
+BASE_PATH = "/"
