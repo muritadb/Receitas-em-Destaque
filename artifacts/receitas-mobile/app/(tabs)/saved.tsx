@@ -32,7 +32,7 @@ export default function SavedScreen() {
         ) : (
           savedRecipes.map((recipe) => (
             <Pressable key={recipe.id} onPress={() => router.push({ pathname: '/recipe/[id]', params: { id: recipe.id } })} style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Image source={recipe.image} style={styles.image} />
+              <Image source={recipe.image} style={styles.image} resizeMode="cover" />
               <View style={styles.cardBody}>
                 <Text style={[styles.category, { color: colors.primary }]}>{recipe.category}</Text>
                 <Text style={[styles.cardTitle, { color: colors.foreground }]}>{recipe.title}</Text>

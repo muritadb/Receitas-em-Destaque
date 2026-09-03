@@ -30,7 +30,7 @@ export default function RecipeDetailScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
         <View style={styles.hero}>
-          <Image source={recipe.image} style={styles.heroImage} />
+          <Image source={recipe.image} style={styles.heroImage} resizeMode="cover" />
           <View style={styles.heroShade} />
           <Pressable testID="back-button" onPress={() => router.back()} style={[styles.topButton, { backgroundColor: colors.card }]}>
             <Feather name="arrow-left" size={20} color={colors.foreground} />

@@ -42,7 +42,7 @@ function RecipeRow({ recipe }: { recipe: Recipe }) {
       onPress={() => router.push({ pathname: '/recipe/[id]', params: { id: recipe.id } })}
       style={({ pressed }) => [styles.recipeRow, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.94 : 1 }]}
     >
-      <Image source={recipe.image} style={styles.rowImage} />
+      <Image source={recipe.image} style={styles.rowImage} resizeMode="cover" />
       <View style={styles.rowContent}>
         <View style={styles.rowTopline}>
           <Text style={[styles.categoryLabel, { color: colors.primary }]}>{recipe.category}</Text>
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   featuredLike: { position: 'absolute', top: 16, right: 16, width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   discoverHeading: { marginBottom: 15 },
   recipeRow: { minHeight: 138, borderRadius: 20, borderWidth: 1, padding: 9, flexDirection: 'row', marginBottom: 12 },
-  rowImage: { width: 120, borderRadius: 14, minHeight: 118 },
+  rowImage: { width: 120, height: 118, borderRadius: 14 },
   rowContent: { flex: 1, paddingLeft: 12, paddingTop: 2, paddingBottom: 1, justifyContent: 'space-between' },
   rowTopline: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   categoryLabel: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.1, textTransform: 'uppercase' },
