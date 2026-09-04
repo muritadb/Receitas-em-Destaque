@@ -3,6 +3,7 @@ import { Link, useRouter, type Href } from 'expo-router';
 import { Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSignUp } from '@clerk/expo';
 import { useColors } from '@/hooks/useColors';
+import { SocialAuthButtons } from '@/components/SocialAuthButtons';
 
 export default function SignUpScreen() {
   const colors = useColors();
@@ -44,6 +45,7 @@ export default function SignUpScreen() {
           </>
         ) : (
           <>
+            <SocialAuthButtons />
             <Text style={[styles.label, { color: colors.foreground }]}>E-mail</Text>
             <TextInput style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card }]} autoCapitalize="none" autoComplete="email" keyboardType="email-address" value={emailAddress} onChangeText={setEmailAddress} placeholder="voce@email.com" placeholderTextColor={colors.mutedForeground} />
             {errors.fields.emailAddress && <Text style={styles.error}>{errors.fields.emailAddress.message}</Text>}
