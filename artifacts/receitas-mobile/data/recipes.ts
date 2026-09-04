@@ -14,6 +14,9 @@ export type Recipe = {
   image: ImageSourcePropType;
   ingredients: string[];
   steps: string[];
+  liked?: boolean;
+  saved?: boolean;
+  authorId?: string;
 };
 
 export const categories = ['Todas', 'Mais curtidas', 'Rápidas', 'Doces', 'Saudáveis'];

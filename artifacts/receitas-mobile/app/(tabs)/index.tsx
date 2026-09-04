@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
   Image,
@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { categories, recipes, Recipe } from '@/data/recipes';
+import { categories, Recipe } from '@/data/recipes';
 import { useColors } from '@/hooks/useColors';
 import { useRecipes } from '@/context/RecipeContext';
 
@@ -81,10 +81,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todas');
-  const { likedIds, savedIds, toggleLike, toggleSaved } = useRecipes();
+  const { recipes, likedIds, savedIds, toggleLike, toggleSaved, isLoading, error } = useRecipes();
   const featured = recipes[0];
-  const featuredLiked = likedIds.includes(featured.id);
-  const featuredSaved = savedIds.includes(featured.id);
+  const featuredLiked = featured ? likedIds.includes(featured.id) : false;
+  const featuredSaved = featured ? savedIds.includes(featured.id) : false;
 
   const filteredRecipes = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -98,6 +98,14 @@ export default function HomeScreen() {
     });
   }, [activeCategory, search]);
 
+  if (isLoading) {
+    return <View style={[styles.centerState, { backgroundColor: colors.background }]}><Text style={[styles.emptyTitle, { color: colors.foreground }]}>Carregando receitas...</Text></View>;
+  }
+
+  if (error || !featured) {
+    return <View style={[styles.centerState, { backgroundColor: colors.background }]}><Text style={[styles.emptyTitle, { color: colors.foreground }]}>Não foi possível carregar o Pitada.</Text><Text style={[styles.emptyText, { color: colors.mutedForeground }]}>{error?.message ?? 'Ainda não há receitas publicadas.'}</Text></View>;
+  }
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <ScrollView
@@ -109,9 +117,14 @@ export default function HomeScreen() {
             <Text style={[styles.eyebrow, { color: colors.primary }]}>BEM-VINDA À</Text>
             <Text style={[styles.brand, { color: colors.foreground }]}>Pitada<Text style={{ color: colors.primary }}>.</Text></Text>
           </View>
-          <Pressable testID="profile-button" onPress={() => router.push('/profile')} style={({ pressed }) => [styles.profileButton, { backgroundColor: colors.secondary, opacity: pressed ? 0.75 : 1 }]}>
-            <Feather name="user" size={20} color={colors.foreground} />
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable testID="create-recipe-button" onPress={() => router.push('/create-recipe' as Href)} style={({ pressed }) => [styles.profileButton, { backgroundColor: colors.primary, opacity: pressed ? 0.75 : 1 }]}>
+              <Feather name="plus" size={20} color={colors.card} />
+            </Pressable>
+            <Pressable testID="profile-button" onPress={() => router.push('/profile')} style={({ pressed }) => [styles.profileButton, { backgroundColor: colors.secondary, opacity: pressed ? 0.75 : 1 }]}>
+              <Feather name="user" size={20} color={colors.foreground} />
+            </Pressable>
+          </View>
         </View>
 
         <Text style={[styles.greeting, { color: colors.foreground }]}>O que vamos cozinhar hoje?</Text>
@@ -211,6 +224,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   scrollContent: { paddingHorizontal: 20 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerActions: { flexDirection: 'row', gap: 8 },
   eyebrow: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 2.2, marginBottom: 1 },
   brand: { fontFamily: 'Inter_700Bold', fontSize: 30, letterSpacing: -1.2 },
   greeting: { fontFamily: 'Inter_700Bold', fontSize: 25, letterSpacing: -0.7, marginTop: 30 },
@@ -258,4 +272,5 @@ const styles = StyleSheet.create({
   emptyState: { minHeight: 150, borderWidth: 1, borderRadius: 20, alignItems: 'center', justifyContent: 'center', gap: 8 },
   emptyTitle: { fontFamily: 'Inter_700Bold', fontSize: 16 },
   emptyText: { fontFamily: 'Inter_400Regular', fontSize: 13 },
+  centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 8 },
 });

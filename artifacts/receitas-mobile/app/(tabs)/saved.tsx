@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { recipes } from '@/data/recipes';
 import { useColors } from '@/hooks/useColors';
 import { useRecipes } from '@/context/RecipeContext';
 
@@ -11,7 +10,7 @@ export default function SavedScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { savedIds, toggleSaved } = useRecipes();
+  const { recipes, savedIds, toggleSaved, isLoading } = useRecipes();
   const savedRecipes = recipes.filter((recipe) => savedIds.includes(recipe.id));
 
   return (
@@ -20,7 +19,9 @@ export default function SavedScreen() {
         <Text style={[styles.eyebrow, { color: colors.primary }]}>SUA COLEÇÃO</Text>
         <Text style={[styles.title, { color: colors.foreground }]}>Receitas salvas</Text>
         <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Aquelas ideias que você quer fazer em breve.</Text>
-        {savedRecipes.length === 0 ? (
+        {isLoading ? (
+          <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>Carregando sua coleção...</Text>
+        ) : savedRecipes.length === 0 ? (
           <View style={[styles.empty, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={[styles.emptyIcon, { backgroundColor: colors.accent }]}><Feather name="bookmark" size={23} color={colors.accentForeground} /></View>
             <Text style={[styles.emptyTitle, { color: colors.foreground }]}>Sua coleção está vazia</Text>

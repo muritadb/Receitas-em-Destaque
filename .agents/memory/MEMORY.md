@@ -1,0 +1,1 @@
+- [Expo DevTools limitation](react-native-devtools.md) — missing container GLib affects only the optional DevTools binary; Expo and the web preview can still run normally.

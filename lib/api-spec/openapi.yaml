@@ -3,13 +3,17 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Pitada community recipes API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: recipes
+    description: Community recipe operations
+  - name: community
+    description: Profiles and followers
 paths:
   /healthz:
     get:
@@ -24,7 +28,217 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /recipes:
+    get:
+      operationId: listRecipes
+      tags: [recipes]
+      summary: List community recipes
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: mine
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Recipe list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+        "401":
+          description: Authentication required when filtering by own recipes
+    post:
+      operationId: createRecipe
+      tags: [recipes]
+      summary: Create a recipe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeInput"
+      responses:
+        "201":
+          description: Created recipe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "400":
+          description: Invalid recipe
+        "401":
+          description: Authentication required
+  /recipes/{id}:
+    get:
+      operationId: getRecipe
+      tags: [recipes]
+      summary: Get a recipe
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+      responses:
+        "200":
+          description: Recipe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "404":
+          description: Recipe not found
+    patch:
+      operationId: updateRecipe
+      tags: [recipes]
+      summary: Update an owned recipe
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeUpdate"
+      responses:
+        "200":
+          description: Updated recipe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+        "401":
+          description: Authentication required
+        "403":
+          description: Recipe ownership required
+        "404":
+          description: Recipe not found
+    delete:
+      operationId: deleteRecipe
+      tags: [recipes]
+      summary: Delete an owned recipe
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+      responses:
+        "204":
+          description: Recipe deleted
+        "401":
+          description: Authentication required
+        "403":
+          description: Recipe ownership required
+        "404":
+          description: Recipe not found
+  /recipes/{id}/like:
+    post:
+      operationId: toggleRecipeLike
+      tags: [recipes]
+      summary: Like or unlike a recipe
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+      responses:
+        "200":
+          description: Like state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToggleResponse"
+        "401":
+          description: Authentication required
+        "404":
+          description: Recipe not found
+  /recipes/{id}/save:
+    post:
+      operationId: toggleRecipeSave
+      tags: [recipes]
+      summary: Save or unsave a recipe
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+      responses:
+        "200":
+          description: Save state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToggleResponse"
+        "401":
+          description: Authentication required
+        "404":
+          description: Recipe not found
+  /me:
+    get:
+      operationId: getCurrentUser
+      tags: [community]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: Current profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Authentication required
+  /users/{id}:
+    get:
+      operationId: getUserProfile
+      tags: [community]
+      summary: Get a public user profile
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: Public profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "404":
+          description: User not found
+  /users/{id}/follow:
+    post:
+      operationId: toggleUserFollow
+      tags: [community]
+      summary: Follow or unfollow a user
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: Follow state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToggleResponse"
+        "400":
+          description: Cannot follow yourself
+        "401":
+          description: Authentication required
+        "404":
+          description: User not found
 components:
+  parameters:
+    RecipeId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    UserId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +247,178 @@ components:
           type: string
       required:
         - status
-
+    RecipeAuthor:
+      type: object
+      required: [id, displayName, username, followersCount, isFollowing]
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        username:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        bio:
+          type: string
+        followersCount:
+          type: integer
+        isFollowing:
+          type: boolean
+    Recipe:
+      type: object
+      required:
+        - id
+        - title
+        - subtitle
+        - category
+        - timeMinutes
+        - difficulty
+        - servings
+        - ingredients
+        - steps
+        - likes
+        - liked
+        - saved
+        - author
+        - imageUrl
+        - createdAt
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        subtitle:
+          type: string
+        category:
+          type: string
+        timeMinutes:
+          type: integer
+        difficulty:
+          type: string
+        servings:
+          type: string
+        ingredients:
+          type: array
+          items:
+            type: string
+        steps:
+          type: array
+          items:
+            type: string
+        likes:
+          type: integer
+        liked:
+          type: boolean
+        saved:
+          type: boolean
+        imageUrl:
+          type: ["string", "null"]
+        author:
+          $ref: "#/components/schemas/RecipeAuthor"
+        createdAt:
+          type: string
+          format: date-time
+    RecipeInput:
+      type: object
+      required:
+        - title
+        - subtitle
+        - category
+        - timeMinutes
+        - difficulty
+        - servings
+        - ingredients
+        - steps
+      properties:
+        title:
+          type: string
+          minLength: 1
+        subtitle:
+          type: string
+        category:
+          type: string
+        timeMinutes:
+          type: integer
+          minimum: 1
+        difficulty:
+          type: string
+        servings:
+          type: string
+        ingredients:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        steps:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        imageUrl:
+          type: ["string", "null"]
+    RecipeUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        subtitle:
+          type: string
+        category:
+          type: string
+        timeMinutes:
+          type: integer
+          minimum: 1
+        difficulty:
+          type: string
+        servings:
+          type: string
+        ingredients:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        steps:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        imageUrl:
+          type: ["string", "null"]
+    ToggleResponse:
+      type: object
+      required: [active]
+      properties:
+        active:
+          type: boolean
+    UserProfile:
+      type: object
+      required:
+        - id
+        - displayName
+        - username
+        - bio
+        - followersCount
+        - followingCount
+        - recipesCount
+        - isFollowing
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        username:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        bio:
+          type: string
+        followersCount:
+          type: integer
+        followingCount:
+          type: integer
+        recipesCount:
+          type: integer
+        isFollowing:
+          type: boolean

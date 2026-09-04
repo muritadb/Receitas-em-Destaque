@@ -11,20 +11,53 @@ import {
   Inter_700Bold,
   useFonts,
 } from '@expo-google-fonts/inter';
-import { Stack } from 'expo-router';
+import { Stack, type Href, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { RecipeProvider } from '@/context/RecipeContext';
+import { ClerkProvider, useAuth } from '@clerk/expo';
+import { tokenCache } from '@clerk/expo/token-cache';
+import { setAuthTokenGetter, setBaseUrl } from '@workspace/api-client-react';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
+const apiDomain = process.env.EXPO_PUBLIC_DOMAIN;
+if (apiDomain) setBaseUrl(`https://${apiDomain}`);
+
+function AuthBridge() {
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    setAuthTokenGetter(() => getToken());
+    return () => setAuthTokenGetter(null);
+  }, [getToken]);
+
+  return null;
+}
+
 function RootLayoutNav() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const inAuthGroup = String(segments[0]) === '(auth)';
+    if (!isSignedIn && !inAuthGroup) router.replace('/(auth)/sign-in' as Href);
+    if (isSignedIn && inAuthGroup) router.replace('/');
+  }, [isLoaded, isSignedIn, segments, router]);
+
+  if (!isLoaded) return null;
+
   return (
     <Stack screenOptions={{ headerBackTitle: 'Back' }}>
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="create-recipe" options={{ headerShown: false }} />
+      <Stack.Screen name="my-recipes" options={{ headerShown: false }} />
     </Stack>
   );
 }
@@ -45,19 +78,31 @@ export default function RootLayout() {
 
   if (!fontsLoaded && !fontError) return null;
 
+  const publishableKey =
+    process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ??
+    process.env.VITE_CLERK_PUBLISHABLE_KEY ??
+    process.env.CLERK_PUBLISHABLE_KEY;
+
+  if (!publishableKey) {
+    throw new Error('Clerk publishable key is missing. Configure the Clerk secrets for the mobile workflow.');
+  }
+
   return (
-    <SafeAreaProvider>
-      <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <GestureHandlerRootView>
-            <KeyboardProvider>
-              <RecipeProvider>
-                <RootLayoutNav />
-              </RecipeProvider>
-            </KeyboardProvider>
-          </GestureHandlerRootView>
-        </QueryClientProvider>
-      </ErrorBoundary>
-    </SafeAreaProvider>
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <GestureHandlerRootView>
+              <KeyboardProvider>
+                <AuthBridge />
+                <RecipeProvider>
+                  <RootLayoutNav />
+                </RecipeProvider>
+              </KeyboardProvider>
+            </GestureHandlerRootView>
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </SafeAreaProvider>
+    </ClerkProvider>
   );
 }

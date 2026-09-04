@@ -3,17 +3,32 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getRecipe } from '@/data/recipes';
 import { useColors } from '@/hooks/useColors';
 import { useRecipes } from '@/context/RecipeContext';
+import { useGetUserProfile, useToggleUserFollow } from '@workspace/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function RecipeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const recipe = getRecipe(id);
   const router = useRouter();
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { likedIds, savedIds, toggleLike, toggleSaved } = useRecipes();
+  const { recipes, likedIds, savedIds, toggleLike, toggleSaved, isLoading } = useRecipes();
+  const recipe = recipes.find((item) => item.id === id);
+  const authorId = recipe?.authorId ?? 'seed-pitada';
+  const { data: authorProfile } = useGetUserProfile(authorId);
+  const queryClient = useQueryClient();
+  const followMutation = useToggleUserFollow({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries();
+      },
+    },
+  });
+
+  if (isLoading) {
+    return <View style={[styles.missing, { backgroundColor: colors.background }]}><Text style={[styles.missingText, { color: colors.foreground }]}>Carregando receita...</Text></View>;
+  }
 
   if (!recipe) {
     return <View style={[styles.missing, { backgroundColor: colors.background }]}><Text style={[styles.missingText, { color: colors.foreground }]}>Receita não encontrada.</Text></View>;
@@ -46,7 +61,7 @@ export default function RecipeDetailScreen() {
           <View style={styles.heroText}><Text style={[styles.heroCategory, { color: colors.card }]}>{recipe.category}</Text><Text style={[styles.heroTitle, { color: colors.card }]}>{recipe.title}</Text></View>
         </View>
         <View style={styles.detailContent}>
-          <View style={styles.authorRow}><View style={[styles.detailAvatar, { backgroundColor: colors.accent }]}><Text style={[styles.detailAvatarText, { color: colors.accentForeground }]}>{recipe.initials}</Text></View><View><Text style={[styles.authorName, { color: colors.foreground }]}>{recipe.author}</Text><Text style={[styles.authorCaption, { color: colors.mutedForeground }]}>Receita compartilhada pela comunidade</Text></View></View>
+          <View style={styles.authorRow}><View style={[styles.detailAvatar, { backgroundColor: colors.accent }]}><Text style={[styles.detailAvatarText, { color: colors.accentForeground }]}>{recipe.initials}</Text></View><View style={styles.authorInfo}><Text style={[styles.authorName, { color: colors.foreground }]}>{recipe.author}</Text><Text style={[styles.authorCaption, { color: colors.mutedForeground }]}>{authorProfile ? `${authorProfile.followersCount} seguidores` : 'Receita compartilhada pela comunidade'}</Text></View>{recipe.authorId && <Pressable onPress={() => followMutation.mutate({ id: recipe.authorId! })} disabled={followMutation.isPending} style={[styles.followButton, { borderColor: colors.primary }]}><Text style={[styles.followText, { color: colors.primary }]}>{authorProfile?.isFollowing ? 'Seguindo' : 'Seguir'}</Text></Pressable>}</View>
           <View style={styles.infoRow}>
             <View style={[styles.infoItem, { backgroundColor: colors.secondary }]}><Feather name="clock" size={16} color={colors.primary} /><Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>TEMPO</Text><Text style={[styles.infoValue, { color: colors.foreground }]}>{recipe.time}</Text></View>
             <View style={[styles.infoItem, { backgroundColor: colors.secondary }]}><Feather name="bar-chart-2" size={16} color={colors.primary} /><Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>NÍVEL</Text><Text style={[styles.infoValue, { color: colors.foreground }]}>{recipe.difficulty}</Text></View>
@@ -79,6 +94,9 @@ const styles = StyleSheet.create({
   detailAvatarText: { fontFamily: 'Inter_700Bold', fontSize: 13 },
   authorName: { fontFamily: 'Inter_700Bold', fontSize: 13 },
   authorCaption: { fontFamily: 'Inter_400Regular', fontSize: 11, marginTop: 3 },
+  authorInfo: { flex: 1 },
+  followButton: { borderWidth: 1, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 7 },
+  followText: { fontFamily: 'Inter_600SemiBold', fontSize: 11 },
   infoRow: { flexDirection: 'row', gap: 8, marginTop: 23 },
   infoItem: { flex: 1, minHeight: 82, borderRadius: 15, padding: 11 },
   infoLabel: { fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8, marginTop: 8 },
