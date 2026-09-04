@@ -4,11 +4,23 @@ import * as WebBrowser from 'expo-web-browser';
 import { useSSO } from '@clerk/expo';
 import { useRouter } from 'expo-router';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { useColors } from '@/hooks/useColors';
 
 WebBrowser.maybeCompleteAuthSession();
 
 type Provider = 'google' | 'facebook';
+
+function GoogleMark() {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24" accessibilityLabel="Google">
+      <Path fill="#4285F4" d="M21.35 12.1c0-.74-.07-1.45-.2-2.1H12v3.98h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.27Z" />
+      <Path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.75 9.75 0 0 0 12 21.5Z" />
+      <Path fill="#FBBC05" d="M6.54 13.58A5.85 5.85 0 0 1 6.23 12c0-.55.1-1.09.31-1.58V7.89H3.3A9.5 9.5 0 0 0 2.25 12c0 1.53.37 2.98 1.05 4.11l3.24-2.53Z" />
+      <Path fill="#EA4335" d="M12 6.39c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.46 14.63 2.5 12 2.5a9.75 9.75 0 0 0-8.7 5.39l3.24 2.53C7.31 8.11 9.46 6.39 12 6.39Z" />
+    </Svg>
+  );
+}
 
 export function SocialAuthButtons() {
   const colors = useColors();
@@ -70,7 +82,7 @@ export function SocialAuthButtons() {
           accessibilityLabel="Continuar com Google"
           style={({ pressed }) => [styles.socialButton, { borderColor: colors.border, backgroundColor: colors.card, opacity: pressed || isBusy ? 0.65 : 1 }]}
         >
-          <View style={[styles.googleMark, { borderColor: colors.primary }]}><Text style={[styles.googleText, { color: colors.primary }]}>G</Text></View>
+          <GoogleMark />
         </Pressable>
         <Pressable
           onPress={() => void continueWith('facebook')}
@@ -92,8 +104,6 @@ const styles = StyleSheet.create({
   buttons: { flexDirection: 'row', gap: 12 },
   socialButton: { width: 50, height: 50, borderWidth: 1, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   facebookButton: { borderWidth: 0 },
-  googleMark: { width: 23, height: 23, borderWidth: 2, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  googleText: { fontFamily: 'Inter_700Bold', fontSize: 15 },
   facebookMark: { color: '#fff', fontFamily: 'Inter_700Bold', fontSize: 25, lineHeight: 25 },
   error: { color: '#c4473d', fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 8 },
 });
