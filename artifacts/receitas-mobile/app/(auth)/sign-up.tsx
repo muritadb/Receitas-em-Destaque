@@ -45,7 +45,6 @@ export default function SignUpScreen() {
           </>
         ) : (
           <>
-            <SocialAuthButtons />
             <Text style={[styles.label, { color: colors.foreground }]}>E-mail</Text>
             <TextInput style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card }]} autoCapitalize="none" autoComplete="email" keyboardType="email-address" value={emailAddress} onChangeText={setEmailAddress} placeholder="voce@email.com" placeholderTextColor={colors.mutedForeground} />
             {errors.fields.emailAddress && <Text style={styles.error}>{errors.fields.emailAddress.message}</Text>}
@@ -55,6 +54,7 @@ export default function SignUpScreen() {
             <View nativeID="clerk-captcha" />
             <Pressable onPress={() => void submit()} disabled={!emailAddress || !password || isBusy} style={[styles.button, { backgroundColor: colors.primary, opacity: !emailAddress || !password || isBusy ? 0.5 : 1 }]}><Text style={styles.buttonText}>Criar conta</Text></Pressable>
             <View style={styles.footer}><Text style={{ color: colors.mutedForeground }}>Já tem uma conta? </Text><Link href={'/(auth)/sign-in' as Href}><Text style={[styles.link, { color: colors.primary, marginTop: 0 }]}>Entrar</Text></Link></View>
+            <SocialAuthButtons />
           </>
         )}
       </View>

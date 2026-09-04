@@ -53,7 +53,6 @@ export default function SignInScreen() {
           </>
         ) : (
           <>
-            <SocialAuthButtons />
             <Text style={[styles.label, { color: colors.foreground }]}>E-mail</Text>
             <TextInput style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card }]} autoCapitalize="none" autoComplete="email" keyboardType="email-address" value={emailAddress} onChangeText={setEmailAddress} placeholder="voce@email.com" placeholderTextColor={colors.mutedForeground} />
             {errors.fields.identifier && <Text style={styles.error}>{errors.fields.identifier.message}</Text>}
@@ -62,6 +61,7 @@ export default function SignInScreen() {
             {errors.fields.password && <Text style={styles.error}>{errors.fields.password.message}</Text>}
             <Pressable onPress={() => void submit()} disabled={!emailAddress || !password || isBusy} style={[styles.button, { backgroundColor: colors.primary, opacity: !emailAddress || !password || isBusy ? 0.5 : 1 }]}><Text style={styles.buttonText}>Entrar</Text></Pressable>
             <View style={styles.footer}><Text style={{ color: colors.mutedForeground }}>Ainda não tem conta? </Text><Link href={'/(auth)/sign-up' as Href}><Text style={[styles.link, { color: colors.primary }]}>Criar agora</Text></Link></View>
+            <SocialAuthButtons />
           </>
         )}
       </View>
